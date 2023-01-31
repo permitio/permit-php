@@ -1,4 +1,4 @@
-# Permmit PHP
+# Permit PHP SDK
 
 
 Authorization as a service
