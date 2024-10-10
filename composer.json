@@ -1,4 +1,5 @@
 {
+    "name": "permitio/permit-php",
     "description": "Authorization as a service",
     "keywords": [
         "openapitools",
