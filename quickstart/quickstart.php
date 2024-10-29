@@ -1,11 +1,6 @@
 <?php
 
 require 'vendor/autoload.php';
-require '../lib/Api/PDP/AuthorizationAPIApi.php';
-require '../lib/Model/PDP/Query.php';
-require '../lib/Model/PDP/HTTPValidationError.php';
-require '../lib/ObjectSerializer.php';
-require '../lib/Model/PDP/AuthorizationResult.php';
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
@@ -13,11 +8,9 @@ use React\Http\Server;
 use Psr\Http\Message\ServerRequestInterface;
 use React\EventLoop\Factory;
 use React\Socket\SocketServer;
-use OpenAPI\Client\Api\PDP\AuthorizationAPIApi;
-use OpenAPI\Client\Model\PDP\AuthorizationResult;
 
 
-$permitToken = 'permit_key_wapNkneuIdVEBZieehM8CtcRE4NynqAZhjOoZle3glqTMY1dnfXT9LN8EKmuYZdaWpp8hFLurIwRjB09tyHcUy';
+$permitToken = '<Place your Permit Token here>';
 $pdpUrl = 'https://cloudpdp.api.permit.io';
 $apiUrl = 'https://api.permit.io';
 $port = 4000;
@@ -58,7 +51,7 @@ try {
 
 // Permit check function
 $pdpConfig = OpenAPI\Client\Configuration::getDefaultConfiguration()->setAccessToken($permitToken)->setHost($pdpUrl);
-$pdpInstance = new AuthorizationAPIApi(
+$pdpInstance = new OpenAPI\Client\Api\PDP\AuthorizationAPIApi(
     new GuzzleHttp\Client(),
     $pdpConfig
 );

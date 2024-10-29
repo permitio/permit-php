@@ -47,29 +47,86 @@ Please follow the [installation procedure](#installation--usage) and then run th
 
 ```php
 <?php
-require_once(__DIR__ . '/vendor/autoload.php');
+
+require 'vendor/autoload.php';
+
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use React\Http\Server;
+use Psr\Http\Message\ServerRequestInterface;
+use React\EventLoop\Factory;
+use React\Socket\SocketServer;
 
 
+$permitToken = '<Place your Permit Token here>';
+$pdpUrl = 'https://cloudpdp.api.permit.io';
+$apiUrl = 'https://api.permit.io';
+$port = 4000;
 
-// Configure Bearer (JWT) authorization: HTTPBearer
-$config = OpenAPI\Client\Configuration::getDefaultConfiguration()->setAccessToken('YOUR_ACCESS_TOKEN');
+$config = OpenAPI\Client\Configuration::getDefaultConfiguration()->setAccessToken($permitToken)->setHost($apiUrl);
 
-
+// Get the scope of the API key
 $apiInstance = new OpenAPI\Client\Api\APIKeysApi(
-    // If you want use custom http client, pass your client which implements `GuzzleHttp\ClientInterface`.
-    // This is optional, `GuzzleHttp\Client` will be used as default.
     new GuzzleHttp\Client(),
     $config
 );
-$api_key_create = new \OpenAPI\Client\Model\APIKeyCreate(); // \OpenAPI\Client\Model\APIKeyCreate
-
 try {
-    $result = $apiInstance->createApiKey($api_key_create);
-    print_r($result);
+    $scope = $apiInstance->getApiKeyScope();
+    print_r($scope);
 } catch (Exception $e) {
-    echo 'Exception when calling APIKeysApi->createApiKey: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling APIKeys';
 }
 
+$usersInstance = new OpenAPI\Client\Api\UsersApi(
+    new GuzzleHttp\Client(),
+    $config
+);
+
+// Create user with the given data
+$user_create = new \OpenAPI\Client\Model\UserCreate([
+    'key' => 'raz-cohen',
+    'email' => 'raz@permit.io',
+    'first_name' => 'Raz',
+    'last_name' => 'Cohen',
+]);
+try {
+    $result = $usersInstance->createUser($scope->getProjectId(), $scope->getEnvironmentId(), $user_create);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling UsersApi->createUser: ', $e->getMessage(), PHP_EOL;
+}
+
+
+// Permit check function
+$pdpConfig = OpenAPI\Client\Configuration::getDefaultConfiguration()->setAccessToken($permitToken)->setHost($pdpUrl);
+$pdpInstance = new OpenAPI\Client\Api\PDP\AuthorizationAPIApi(
+    new GuzzleHttp\Client(),
+    $pdpConfig
+);
+// Create a query object - this is the data we want to check
+// in this case we're checking if the user 'raz-cohen' is allowed to read a document
+$query = new \OpenAPI\Client\Model\PDP\Query([
+    'user' => ['key' => 'raz-cohen'],
+    'action' => 'read',
+    'resource' => [
+        'type' => 'document',
+        'tenant' => 'default'
+    ]
+]);
+try {
+    $is_allowed = $pdpInstance->isAllowedAllowedPost(
+        $query,
+    );
+
+    // We'll print the result to the console
+    if ($is_allowed->getAllow()) {
+        echo "Permitted\n";
+    } else {
+        echo "Not Permitted\n";
+    }
+} catch (Exception $e) {
+    echo 'Exception when calling PDP\AuthorizationAPIApi->isAllowedAllowedPost: ', $e->getMessage(), PHP_EOL;
+}
 ```
 
 ## API Endpoints
