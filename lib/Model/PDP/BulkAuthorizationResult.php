@@ -57,7 +57,7 @@ class BulkAuthorizationResult implements ModelInterface, ArrayAccess, \JsonSeria
       * @var string[]
       */
     protected static $openAPITypes = [
-        'allow' => '\OpenAPI\Client\Model\AuthorizationResult[]'
+        'allow' => '\OpenAPI\Client\Model\PDP\AuthorizationResult[]'
     ];
 
     /**
